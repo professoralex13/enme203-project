@@ -1,0 +1,118 @@
+% ----------------------------------------------------------------
+% Report Class (This is a LaTeX2e document)  *********************
+% ----------------------------------------------------------------
+\documentclass[11pt]{article}
+\usepackage[english]{babel}
+\usepackage{amsmath,amsthm}
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+\usepackage{graphicx,xcolor}
+\usepackage{geometry,cite}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[L]{\footnotesize{\textsf{[Alex Cutforth, 24375019]}}}
+\fancyhead[R]{\footnotesize{\textsf{ENME 203, Project 2025, \today}}}
+\fancyfoot[R]{\footnotesize{\textsf{page \thepage}}}
+\geometry{ %showframe,               % shows frame, helpful for initial setup
+           includehead,              % header
+           includefoot,              % footer                "
+           paper       = a4paper,    % paper format
+           top         = 2.0 cm,     % margin top
+           bottom      = 1.0 cm,     % margin bottom
+           inner       = 2.0 cm,     % margin left (inner if "twoside")
+           outer       = 2.0 cm,     % margin right (outer if "twoside")
+           headheight  = 0.5 cm,     % space headline
+           headsep     = 0.5 cm,     % distance header to text
+           footskip    = 0.5 cm      % distance text to footer
+         }
+\pagestyle{fancy}
+% ----------------------------------------------------------------
+\begin{document}
+\begin{titlepage}
+\hfill\includegraphics[width=40mm]{UCLogo.png}
+\begin{center}
+
+\vspace*{\fill}
+
+\textbf{\huge{\textsl{Dynamics of a simplified wingsuit}}}\\
+ENME203 2025 Project\\
+\vspace*{\fill}
+
+
+\textbf{\large Alex Cutforth}
+
+\textbf{\large Other Details}
+
+\vspace*{\fill}
+
+\textnormal{\large \today}
+
+\end{center}
+\end{titlepage}
+
+% ----------------------------------------------------------------
+\section*{Abstract}
+\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[This space is filled with a brief summary about all of the content of this report. It describes and connects all sections: Include topic, main idea, aims, model and method /types of analyses used, and findings and conclusions. Approximate length: 120 words +/- 10\%.]}}
+
+
+% ----------------------------------------------------------------
+\section*{Introduction}
+\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[The introduction of this technical report includes a bit of background and purpose of the project. Identify the subject, background information on its development and use, the aims of the project’s analyses, and the purpose of the project. A complete literature review is usually part of professional communications, to inform the reader of the current state of the research on the subject. A very brief version of that is appropriate here:}}
+\begin{enumerate}
+  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Please cite 2-3 sources (no links to websites, e.g. Wikipedia – use scholarly/professional sources) used to inform your writing of this section}}
+  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Include all citations in your list of References. The Reference list should be on its own page.}}
+  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{The IEEE referencing style should be used.}}
+  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Approximate length: 150-200 words.}}
+\end{enumerate}
+\textcolor[rgb]{0.80,0.29,0.09}{\textsl{Example: In this example sentence I refer to one of my own publications on MEMS technology \cite{gutschmidt2024} to make you aware of the IEEE standard \cite{IEEE} which is mostly used for engineering articles and reports. (The work cited here is totally unrelated to the project!)]}}
+
+
+% ----------------------------------------------------------------
+\section*{Model Description}
+\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[In this section, briefly describe the model and underlying assumptions. This includes using figures with figure descriptions and referencing to these in the text.]}}
+
+\begin{figure}[h!]
+  \centering
+  \caption{...}\label{fig:model}
+\end{figure}
+
+% ----------------------------------------------------------------
+\section*{Method}\label{sec:method}
+\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[This section brings parts 1 and 2 of the project together. Begin with 1-2 sentences explaining the overarching method of using Newton’s/Euler’s method to bring together kinematics (part1) and dynamics (part 2) to generate the EOM.  Include any constraint equations (as part of the analysis, if applicable). Details of the method will then be explained in the following sub-sections: Kinematics, Dynamics and Equations of Motion.]}}
+
+
+% ----------------------------------------------------------------
+\subsection*{Kinematics}\label{sec:kin}
+[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 1. Introduce the kinematic relations using/referring to a kinematic sketch.}}]
+\begin{figure}[h!]
+  \centering
+  \caption{...}\label{fig:kin_sketch}
+\end{figure}
+
+% ----------------------------------------------------------------
+\subsection*{Dynamics}\label{sec:dyn}
+[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 2. Introduce the kinetic relations using/referring to a free-body-diagram.}}] 
+
+\begin{equation}\label{eq:dyn1}
+  F_i = ma_i \qquad \mathrm{with}\quad i\in[x,y,z]
+\end{equation}
+
+% ----------------------------------------------------------------
+\subsection*{Equation of Motion}\label{sec:eom}
+[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 2. Briefly describe the derivation of the equation(s) of motion. Explain the degrees of freedom, and any underlying assumptions. Accompany the method with necessary sketches (e.g. free-body diagram(s) etc.).}}]
+
+% ----------------------------------------------------------------
+\section*{Analysis \& Discussions}\label{sec:anal_disc}
+[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 3. Present results professionally by relating figures/graphs to equation numbers, describing graphs and observations, and discussing results and their meaning.]}}
+
+% ----------------------------------------------------------------
+\section*{Conclusions}\label{sec:conclusion}
+\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[Wrap up the report by summarising key findings and linking results back to the motivation/purpose of the project as described in Introduction section. Approximate length: 80-120 words]}}
+
+
+% ----------------------------------------------------------------
+\bibliography{enme203_project}{}
+\bibliographystyle{unsrt}
+
+\end{document}
+% ----------------------------------------------------------------
