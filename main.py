@@ -131,30 +131,45 @@ def part_d():
 
     axes[1][1].axvline(x=target_U)
 
-    sliders = {}
+    fig, control_axes = plt.subplots(1, len(default_properties) + 1)
 
+    sliders = {
+        'U': Slider(
+            ax=control_axes[0],
+            label='U"',
+            valmin=0,
+            valmax=330 / 3.6,
+            valinit=target_U,
+            orientation='vertical',
+        )
+    }
+    
     def update(val):
         for key in sliders:
             new_properties[key] = sliders[key].val
+        
+        target_U = sliders['U'].val
+
+        axes[1][0].set_title(f'New y(t) when U = {target_U}')
         
         new_solution = simulate(new_properties, 1, 1, target_U)
         new_eigs = get_wingsuit_eigs(new_properties, U_vals)
 
         response_line.set_data(new_solution.t, new_solution.y[1])
-        
+
         for i, eigset in enumerate(new_eigs):
             eig_lines['real'][i].set_ydata(eigset.real)
             eig_lines['imaginary'][i].set_ydata(eigset.imag)
         
         fig.canvas.draw_idle()
 
-    fig, control_axes = plt.subplots(1, len(default_properties))
+    sliders['U'].on_changed(update)
 
     for i, key in enumerate(default_properties):
         valinit = default_properties[key]
 
         sliders[key] = Slider(
-            ax=control_axes[i],
+            ax=control_axes[i + 1],
             label=key,
             valmin=valinit / 2,
             valmax=valinit * 2,

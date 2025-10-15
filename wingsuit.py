@@ -18,7 +18,7 @@ class WingsuitProperties(TypedDict):
     C_t: float
     C_y: float
 
-def get_coef_matrix(p: WingsuitProperties, U: float):
+def get_coef_matrix(p: WingsuitProperties, U: float, log = False):
     theta_ddot_coef = p['I'] - p['m'] * p['l_t'] * p['l_t']
 
     theta_ddot_rhs = np.array([
@@ -52,6 +52,11 @@ def get_coef_matrix(p: WingsuitProperties, U: float):
         y_ddot_rhs
     ])
 
+    if(log):
+        print(A)
+        print(theta_ddot_coef)
+        print(y_ddot_coef)
+
     return A
 
 def get_wingsuit_eigs(p: WingsuitProperties, airspeed_values: np.ndarray[float]):
@@ -65,11 +70,7 @@ def simulate(properties: WingsuitProperties, initial_y_velocity: float, initial_
     t_span = (0, 1)
     t_eval = np.linspace(*t_span, 100)
 
-    A = get_coef_matrix(properties, airspeed)
+    A = get_coef_matrix(properties, airspeed, True)
 
-    return solve_ivp(lambda t, Y: A @ Y, t_span, y0, method='BDF',
-                t_eval=t_eval,  # This forces output at these times
-                rtol=1e-6, 
-                atol=1e-9,
-                max_step=0.001)
+    return solve_ivp(lambda t, Y: A @ Y, t_span, y0)
 
