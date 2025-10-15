@@ -10,7 +10,7 @@
 \usepackage{geometry,cite}
 \fancyhead{}
 \fancyfoot{}
-\fancyhead[L]{\footnotesize{\textsf{[Alex Cutforth, 24375019]}}}
+\fancyhead[L]{\footnotesize{\textsf{Alex Cutforth | 24375019}}}
 \fancyhead[R]{\footnotesize{\textsf{ENME 203, Project 2025, \today}}}
 \fancyfoot[R]{\footnotesize{\textsf{page \thepage}}}
 \geometry{ %showframe,               % shows frame, helpful for initial setup
@@ -41,7 +41,7 @@ ENME203 2025 Project\\
 
 \textbf{\large Alex Cutforth}
 
-\textbf{\large Other Details}
+\textbf{\large acu60@uclive.ac.nz}
 
 \vspace*{\fill}
 
@@ -57,7 +57,12 @@ ENME203 2025 Project\\
 
 % ----------------------------------------------------------------
 \section*{Introduction}
-Hello
+This project focuses on analysing the properties of a simplified wingsuit model, this includes but is not limited to:
+\begin{itemize}
+  \item Kinematic analysis of significant points on the wingsuit
+  \item Derivation of moments of interia, and relevant equations of motion
+  \item Optimization of wingsuit properties for stability improvement
+\end{itemize}
 \textcolor[rgb]{0.80,0.29,0.09}{\textsl{[The introduction of this technical report includes a bit of background and purpose of the project. Identify the subject, background information on its development and use, the aims of the project’s analyses, and the purpose of the project. A complete literature review is usually part of professional communications, to inform the reader of the current state of the research on the subject. A very brief version of that is appropriate here:}}
 \begin{enumerate}
   \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Please cite 2-3 sources (no links to websites, e.g. Wikipedia – use scholarly/professional sources) used to inform your writing of this section}}
@@ -70,6 +75,10 @@ Hello
 
 % ----------------------------------------------------------------
 \section*{Model Description}
+The wingsuit side profile is based on a symmetric 1m long NACA0012 foil.
+However this shape is only relevant for the derivation of Moments and Products of Inertia.\\\\
+$k = 1500$ N/m, $k_{\theta} = 200$ Nm/rad, $d = 150$ Ns/m, $d_{\theta} = 0.03$ Nms/rad, $l_{\theta} = 0.1$ m, $l_{\alpha} = 0.05$ m, $m = 2$ kg, $I^F = 0.13$ kgm\textsuperscript{2}, $C_{\theta} = 0.4$ kg/m, $C_y = 0.6$ kg/m
+\\\\
 \textcolor[rgb]{0.80,0.29,0.09}{\textsl{[In this section, briefly describe the model and underlying assumptions. This includes using figures with figure descriptions and referencing to these in the text.]}}
 
 \begin{figure}[h!]
@@ -84,7 +93,19 @@ Hello
 
 % ----------------------------------------------------------------
 \subsection*{Kinematics}\label{sec:kin}
-[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 1. Introduce the kinematic relations using/referring to a kinematic sketch.}}]
+Since the centre of rotation is not in the same place as the centre of mass for this system, it is neccessary to derive kinematic relations between angular velocities/accelerations and relative translational velocities/accelerations.
+\begin{align}
+  v_{G/F} &=
+  \begin{pmatrix}
+     \dot{\theta}l_{\theta}\sin\theta \\
+    -\dot{\theta}l_{\theta}\cos\theta \\
+  \end{pmatrix} \label{eq:kin1} \\
+  a_{G/F} &=
+  \begin{pmatrix}
+     \ddot{\theta}l_{\theta}\sin\theta + \dot{\theta}^2l_{\theta}\cos\theta \\
+    -\ddot{\theta}l_{\theta}\cos\theta + \dot{\theta}^2l_{\theta}\sin\theta 
+  \end{pmatrix} \label{eq:kin2}
+\end{align}
 \begin{figure}[h!]
   \centering
   \caption{...}\label{fig:kin_sketch}
@@ -92,11 +113,24 @@ Hello
 
 % ----------------------------------------------------------------
 \subsection*{Dynamics}\label{sec:dyn}
-[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 2. Introduce the kinetic relations using/referring to a free-body-diagram.}}] 
+The equations of motions use the format of the basic translational and rotational mass/dampener/spring systems:
+\begin{align*}
+  m\ddot{y} + d\dot{y} + ky &= F \\
+  I\ddot{\theta} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= T
+\end{align*}
+The symbols $F$ and $T$ represent external force and torque acting upon the system, which for this model is just the lift force acting at point A
+\begin{align*}
+  m\ddot{y} + d\dot{y} + ky &= L = C_{\theta}U^2\theta + C_yU\dot{y} \\
+  I\ddot{\theta} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= l_{\alpha}\theta = l_{\alpha}(C_{\theta}U^2\theta + C_yU\dot{y})
+\end{align*}
+Then, since the centre of rotation is not in the same location as the centre of mass, the equations must be linearized, giving the final equations of motion:
+\begin{align}
+  m\ddot{y} - ml_{\theta}\ddot{\theta} + d\dot{y} + ky &= L = C_{\theta}U^2\theta + C_yU\dot{y}\label{eq:eom1} \\
+  I\ddot{\theta} - ml_{\theta}\ddot{y} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= l_{\alpha}\theta = l_{\alpha}(C_{\theta}U^2\theta + C_yU\dot{y})\label{eq:eom2}
+\end{align}
+This is a 2 degrees of freedom system, hence why there are two seperate equations of motion. This is because the translational and rotational properties of the system are not completely dependent upon each other. However, they are \textsl{partially} dependent, which is why there is sharing of quantities between equations. These are known as coupled equations.
 
-\begin{equation}\label{eq:dyn1}
-  F_i = ma_i \qquad \mathrm{with}\quad i\in[x,y,z]
-\end{equation}
+[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 2. Introduce the kinetic relations using/referring to a free-body-diagram.}}] 
 
 % ----------------------------------------------------------------
 \subsection*{Equation of Motion}\label{sec:eom}
@@ -105,6 +139,26 @@ Hello
 % ----------------------------------------------------------------
 \section*{Analysis \& Discussions}\label{sec:anal_disc}
 [\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 3. Present results professionally by relating figures/graphs to equation numbers, describing graphs and observations, and discussing results and their meaning.]}}
+As stated in the Dynamics section, the equations of motion for this system are coupled, this means the equations can not be analysed induvidually, but rather as a system of differential equations.
+However, it is possible to set specific conditions where the equations decouple from each other, this occurs when the centre of mass and flexural axis are aligned ($l_{\theta} = 0$), and the lift coefficient associated with the equation in question's quantity is set to zero ($C_y$ or $C_{\theta} = 0 $). \\\\
+Case 1, where $l_{\theta} = 0$ and $C_y = 0$ results in an equation of motion for rotation of
+\begin{equation}
+  \ddot{\theta}+\frac{d_{\theta}}{I^F}\dot{\theta}+\frac{k_{\theta}-l_{\alpha}C_{\theta}U^2}{I^F}\theta = 0 \label{eq:decoupled1}
+\end{equation}
+This equation can then be considered with the format $\ddot{q} + 2\zeta\omega\dot{q}+\omega^2q = 0$, giving the formulas for frequency and damping ratio:
+\begin{align*}
+  \omega &= \sqrt{\frac{k_{\theta}-l_{\alpha}C_{\theta}U^2}{I^F}} \\
+  \zeta &= \frac{d_{\theta}}{2\sqrt{I^F(k_{\theta}-l_{\alpha}C_{\theta}U^2)}}
+\end{align*}
+This information allows us to find a critical airspeed where the wingsuit's torsional mode becomes statically unstable.
+This critical airspeed occurs when the real component of the roots (given by $\lambda = -\zeta\omega\pm i\omega\sqrt{1-\zeta^2}$) of the equation of motion equal zero.
+Given a positive value for $d_{\theta}$, the equation for $\zeta$ cannot be zero, so to find the solution, $\omega$ must be set to zero. This gives:
+\begin{align*}
+  k_{\theta} &= l_{\alpha}C_{\theta}U^2 \\
+  U &= \sqrt{\frac{k_{\theta}}{l_{\alpha}C_{\theta}}}\\
+    &= 100~\mathrm{km/h}
+\end{align*}
+
 
 % ----------------------------------------------------------------
 \section*{Conclusions}\label{sec:conclusion}
