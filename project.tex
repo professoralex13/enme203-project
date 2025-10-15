@@ -139,6 +139,7 @@ This is a 2 degrees of freedom system, hence why there are two seperate equation
 % ----------------------------------------------------------------
 \section*{Analysis \& Discussions}\label{sec:anal_disc}
 [\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 3. Present results professionally by relating figures/graphs to equation numbers, describing graphs and observations, and discussing results and their meaning.]}}
+\subsection*{Decoupled Analysis}\label{sec:coupled_analysis}
 As stated in the Dynamics section, the equations of motion for this system are coupled, this means the equations can not be analysed induvidually, but rather as a system of differential equations.
 However, it is possible to set specific conditions where the equations decouple from each other, this occurs when the centre of mass and flexural axis are aligned ($l_{\theta} = 0$), and the lift coefficient associated with the equation in question's quantity is set to zero ($C_y$ or $C_{\theta} = 0 $). \\\\
 Case 1, where $l_{\theta} = 0$ and $C_y = 0$ results in an equation of motion for rotation of
@@ -156,9 +157,116 @@ Given a positive value for $d_{\theta}$, the equation for $\zeta$ cannot be zero
 \begin{align*}
   k_{\theta} &= l_{\alpha}C_{\theta}U^2 \\
   U &= \sqrt{\frac{k_{\theta}}{l_{\alpha}C_{\theta}}}\\
-    &= 100~\mathrm{km/h}
+    &= 100~\mathrm{m/s}
 \end{align*}
 
+\subsection*{Modal Analysis}\label{sec:modal_analysis}
+Modal analysis allows us to see the stability of the system as a whole when both degrees of freedom are partially interacting.
+To analyse both equations of motion simultaneously they can be represented in a matrix system of the form
+$$
+  \mathbf{M}\ddot{X}+\mathbf{D}\dot{X}+\mathbf{K}X = 0
+$$
+Then substituting in equations \ref{eq:eom1} and \ref{eq:eom2}
+$$
+  \overbrace{
+    \begin{bmatrix}
+      I^F&-ml_{\theta} \\
+      -ml_{\theta}&m
+    \end{bmatrix}
+  }^{\mathbf{M}}
+  \overbrace{
+    \begin{bmatrix}
+      \ddot{\theta} \\
+      \ddot{y}
+    \end{bmatrix}
+  }^{\ddot{X}}
+  +
+  \overbrace{
+    \begin{bmatrix}
+      d_{\theta}&-l_{\alpha}C_yU\\
+      0&d-C_yU
+    \end{bmatrix}
+  }^{\mathbf{D}}
+  \overbrace{
+    \begin{bmatrix}
+      \dot{\theta} \\
+      \dot{y}
+    \end{bmatrix}
+  }^{\dot{X}}
+  +
+  \overbrace{
+    \begin{bmatrix}
+      k_{\theta}-l_{\alpha}C_{\theta}U^2&0\\
+    -C_{\theta}U^2&k
+    \end{bmatrix}
+  }^{\mathbf{K}}
+  \overbrace{
+    \begin{bmatrix}
+      \theta \\
+      y
+    \end{bmatrix}
+  }^X
+  = 0
+$$
+This system can then be converted into state space
+\begin{align*}
+  \begin{bmatrix}
+    I&0\\
+    0&M
+  \end{bmatrix}
+  \begin{bmatrix}
+    \dot{X}\\
+    \ddot{X}
+  \end{bmatrix}
+  +
+  \begin{bmatrix}
+    0&-I\\
+    K&D
+  \end{bmatrix}
+  \begin{bmatrix}
+    X\\
+    \dot{X}
+  \end{bmatrix}
+  &=0
+  \\
+  \frac{d}{dt}
+  \begin{bmatrix}
+    X\\
+    \dot{X}
+  \end{bmatrix}
+  &=
+  \begin{bmatrix}
+    I&0\\
+    0&M
+  \end{bmatrix}^{-1}
+  \begin{bmatrix}
+    0&I\\
+    -K&-D
+  \end{bmatrix}
+  \begin{bmatrix}
+    X\\
+    \dot{X}
+  \end{bmatrix}
+\end{align*}
+This system is suitable for use with an initial value problem numerical solver, and we can analyse the behavior of such a system by finding the eigenvalues of the coefficient matrix
+$$
+  A = 
+  \begin{bmatrix}
+    I&0\\
+    0&M
+  \end{bmatrix}^{-1}
+  \begin{bmatrix}
+    0&I\\
+    -K&-D
+  \end{bmatrix}
+$$
+The roots of this system can then be plotted against Airspeed using an eigenvalue finder. \\
+A system is unstable if the real parts of any of its eigenvalues is postive, and Figure \ref{fig:modal_roots} shows that the system has positive real components for approximately $U > 30$ m/s, meaning this wingsuit model is not very stable at the reasonably high speeds needed for flight.
+\begin{figure}
+  \centering
+  \includegraphics[width=170mm]{modal_roots.png}
+  \caption{Modal Roots}\label{fig:modal_roots}
+\end{figure}
 
 % ----------------------------------------------------------------
 \section*{Conclusions}\label{sec:conclusion}
