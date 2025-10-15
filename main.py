@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider 
 
-from wingsuit import WingsuitProperties, get_modal_properties, simulate
+from wingsuit import WingsuitProperties, get_wingsuit_eigs, simulate
+
+MAX_SPEED = 550 / 3.6 # Converts kmh to m/s
 
 np.set_printoptions(linewidth=200)
 
@@ -49,47 +51,48 @@ part_b()
 
 # Part C modal analysis
 
-def plot_modes(U_vals, modes, axes, include_decoupled = False):
-    lines = []
+def plot_eigs(U_vals, eigs, axes, include_decoupled = False):
+    real_axis, imaginary_axis = axes
 
-    for i, mode in enumerate(modes):
-        axes[i].set_xlabel('U')
-        axes[i].set_title(f"Mode {i}")
+    real_axis.set_xlabel('Airspeed (m/s)')
+    real_axis.set_title(f"Real")
+    real_axis.set_ylabel(f"Real Eigenvector Components")
 
-        frequency_axis = axes[i]
-        damping_axis = frequency_axis.twinx()
+    real_axis.invert_yaxis()
+    real_axis.axhline(y=0)
 
-        [frequency_line] = frequency_axis.plot(U_vals, mode['frequency'], 'b', label="Coupled Frequency")
+    imaginary_axis.set_xlabel('Airspeed (m/s)')
+    imaginary_axis.set_title('Imaginary')
+    imaginary_axis.set_ylabel(f"Imaginary Eigenvector Component")
 
-        frequency_decoupled = np.sqrt((default_properties['k_t'] - default_properties['l_a'] * default_properties['C_t'] * U_vals * U_vals) / default_properties['I'])
+    frequency_decoupled = np.sqrt((default_properties['k_t'] - default_properties['l_a'] * default_properties['C_t'] * U_vals * U_vals) / default_properties['I'])
+    damping_ratio_decoupled = (default_properties['d'] - default_properties['C_y'] * U_vals) / np.sqrt(default_properties['k'] * default_properties['m'])
 
-        frequency_axis.set_ylabel(f"Frequency", color='b')
-        frequency_axis.tick_params(axis='y', labelcolor='b')
+    lines = { 'real': [], 'imaginary': [] }
 
-        [damping_line] = damping_axis.plot(U_vals, mode['damping'], 'r', label="Coupled Damping Ratio")
+    for i, eig_set in enumerate(eigs):
+        [real_line] = real_axis.plot(U_vals, eig_set.real, label=f"Eigenvalue {i + 1}")
+        [imaginary_line] = imaginary_axis.plot(U_vals, eig_set.imag, label=f"Eigenvalue {i + 1}")
 
-        damping_ratio_decoupled = (default_properties['d'] - default_properties['C_y'] * U_vals) / np.sqrt(default_properties['k'] * default_properties['m'])
-        damping_axis.set_ylabel(f"Damping Ratio", color='r')
+        lines['real'].append(real_line)
+        lines['imaginary'].append(imaginary_line)
 
-        if include_decoupled:
-            frequency_axis.plot(U_vals, frequency_decoupled, 'b.', label="Decoupled Frequency")
-            damping_axis.plot(U_vals, damping_ratio_decoupled, 'r.', label="Decoupled Damping Ratio")
+    if include_decoupled:
+        imaginary_axis.plot(U_vals, frequency_decoupled, 'b.', label="Decoupled Frequency")
 
-        frequency_axis.legend(loc="upper left")
-        damping_axis.legend()
-
-        lines.append({'frequency': frequency_line, 'damping': damping_line})
+    real_axis.legend(loc="upper left")
+    imaginary_axis.legend()
 
     return lines
 
 def part_c():
-    U_vals = np.linspace(0, 500, 501)
+    U_vals = np.arange(0, MAX_SPEED, 1)
 
-    modes = get_modal_properties(default_properties, U_vals)
+    eigs = get_wingsuit_eigs(default_properties, U_vals)
 
-    fig, axes = plt.subplots(1, len(modes))
+    fig, axes = plt.subplots(1, 2)
 
-    plot_modes(U_vals, modes, axes, True)
+    plot_eigs(U_vals, eigs, axes, True)
 
 part_c()
 
@@ -98,15 +101,15 @@ part_c()
 def part_d():
     fig, axes = plt.subplots(2, 3)
 
-    U_vals = np.linspace(0, 500, 501)
+    U_vals = np.arange(0, MAX_SPEED, 1)
     
-    target_U = 330
+    target_U = 330 / 3.6
 
     original_solution = simulate(default_properties, 1, 1, target_U)
 
-    modes = get_modal_properties(default_properties, U_vals)
+    eigs = get_wingsuit_eigs(default_properties, U_vals)
 
-    plot_modes(U_vals, modes, axes[0][1:])
+    plot_eigs(U_vals, eigs, axes[0][1:])
 
     axes[0][0].plot(original_solution.t, original_solution.y[1])
     axes[0][0].set_xlabel('t')
@@ -117,14 +120,16 @@ def part_d():
     new_properties = default_properties.copy()
 
     new_solution = simulate(new_properties, 1, 1, target_U)
-    new_modes = get_modal_properties(new_properties, U_vals)
+    new_eigs = get_wingsuit_eigs(new_properties, U_vals)
 
-    mode_lines = plot_modes(U_vals, new_modes, axes[1][1:])
+    eig_lines = plot_eigs(U_vals, new_eigs, axes[1][1:])
 
     [response_line] = axes[1][0].plot(new_solution.t, new_solution.y[1])
     axes[1][0].set_xlabel('t')
     axes[1][0].set_ylabel('y')
     axes[1][0].set_title(f'New y(t) when U = {target_U}')
+
+    axes[1][1].axvline(x=target_U)
 
     sliders = {}
 
@@ -133,13 +138,13 @@ def part_d():
             new_properties[key] = sliders[key].val
         
         new_solution = simulate(new_properties, 1, 1, target_U)
-        new_modes = get_modal_properties(new_properties, U_vals)
+        new_eigs = get_wingsuit_eigs(new_properties, U_vals)
 
         response_line.set_data(new_solution.t, new_solution.y[1])
         
-        for i, mode in enumerate(mode_lines):
-            mode['frequency'].set_ydata(new_modes[i]['frequency'])
-            mode['damping'].set_ydata(new_modes[i]['damping'])
+        for i, eigset in enumerate(new_eigs):
+            eig_lines['real'][i].set_ydata(eigset.real)
+            eig_lines['imaginary'][i].set_ydata(eigset.imag)
         
         fig.canvas.draw_idle()
 
