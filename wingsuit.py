@@ -18,44 +18,30 @@ class WingsuitProperties(TypedDict):
     C_t: float
     C_y: float
 
-def get_coef_matrix(p: WingsuitProperties, U: float, log = False):
-    theta_ddot_coef = p['I'] - p['m'] * p['l_t'] * p['l_t']
-
-    theta_ddot_rhs = np.array([
-        p['C_t'] * U * U * (p['l_a'] + p['l_t']) - p['k_t'], # theta coef
-        -p['l_t'] * p['k'], # y coef
-        -p['d_t'], # theta_dot coef
-        p['C_y'] * U * (p['l_a'] + p['l_t']) - p['l_t'] * p['d'] # y_dot coef
-    ]) / theta_ddot_coef
-
-    y_ddot_coef = p['m'] - p['m'] * p['m'] * p['l_t'] * p['l_t'] / p['I']
-
-    y_ddot_rhs = np.array([
-        p['C_t'] * U * U + p['m'] * p['l_t'] * (p['l_a'] * p['C_t'] * U * U - p['k_t']) / p['I'], # theta coef
-        -p['k'], # y coef
-        -p['m'] * p['l_t'] * p['d_t'] / p['I'], # theta_dot coef
-        p['C_y'] * U * (1 + p['m'] * p['l_t'] * p['l_a'] / p['I']) - p['d'], # y_dot coef
-    ]) / y_ddot_coef
-
-    # State structure is:
-    # _____________
-    # | theta     |
-    # | y         |
-    # | theta_dot |
-    # | y_dot     |
-    # _____________
-
-    A = np.row_stack([
-        [0, 0, 1, 0],
-        [0, 0, 0, 1],
-        theta_ddot_rhs,
-        y_ddot_rhs
+def get_coef_matrix(p: WingsuitProperties, U: float):
+    M = np.array([
+        [p['I'], -p['m'] * p['l_t']],
+        [-p['m'] * p['l_t'], p['m']]
     ])
 
-    if(log):
-        print(A)
-        print(theta_ddot_coef)
-        print(y_ddot_coef)
+    D = np.array([
+        [p['d_t'], -p['l_a'] * p['C_y'] * U],
+        [0, p['d'] - p['C_y'] * U]
+    ])
+
+    K = np.array([
+        [p['k_t'] - p['l_a'] * p['C_t'] * U * U, 0],
+        [-p['C_t'] * U * U, p['k']]
+    ])
+
+    
+    A = np.block([
+        [np.zeros((2, 2)), np.identity(2)],
+        [-K, -D]
+    ]) @ np.linalg.inv(np.block([
+        [np.identity(2), np.zeros((2, 2))],
+        [np.zeros((2, 2)), M]
+    ]))
 
     return A
 
@@ -64,13 +50,17 @@ def get_wingsuit_eigs(p: WingsuitProperties, airspeed_values: np.ndarray[float])
     
     return np.transpose(all_eigs)
 
-def simulate(properties: WingsuitProperties, initial_y_velocity: float, initial_theta_velocity: float, airspeed: float):
+def simulate(properties: WingsuitProperties, initial_y_velocity: float, initial_theta_velocity: float, airspeed: float, log = False):
     y0 = [0, 0, initial_theta_velocity, initial_y_velocity]
     
     t_span = (0, 1)
     t_eval = np.linspace(*t_span, 100)
 
-    A = get_coef_matrix(properties, airspeed, True)
 
-    return solve_ivp(lambda t, Y: A @ Y, t_span, y0)
+    A = get_coef_matrix(properties, airspeed)
 
+    return solve_ivp(lambda t, Y: A @ Y, t_span, y0, method='BDF',
+                t_eval=t_eval,  # This forces output at these times
+                rtol=1e-6, 
+                atol=1e-9,
+                max_step=0.001)

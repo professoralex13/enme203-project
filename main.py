@@ -136,7 +136,7 @@ def part_d():
     sliders = {
         'U': Slider(
             ax=control_axes[0],
-            label='U"',
+            label='U',
             valmin=0,
             valmax=330 / 3.6,
             valinit=target_U,
@@ -157,6 +157,9 @@ def part_d():
 
         response_line.set_data(new_solution.t, new_solution.y[1])
 
+        axes[1][0].relim()
+        axes[1][0].autoscale_view()
+        
         for i, eigset in enumerate(new_eigs):
             eig_lines['real'][i].set_ydata(eigset.real)
             eig_lines['imaginary'][i].set_ydata(eigset.imag)
