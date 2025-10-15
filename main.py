@@ -99,89 +99,29 @@ part_c()
 # Part d design modification
 
 def part_d():
-    fig, axes = plt.subplots(2, 3)
+    fig, axes = plt.subplots(1, 3)
 
     U_vals = np.arange(0, MAX_SPEED, 1)
     
     target_U = 330 / 3.6
 
-    original_solution = simulate(default_properties, 1, 1, target_U)
-
-    eigs = get_wingsuit_eigs(default_properties, U_vals)
-
-    plot_eigs(U_vals, eigs, axes[0][1:])
-
-    axes[0][0].plot(original_solution.t, original_solution.y[1])
-    axes[0][0].set_xlabel('t')
-    axes[0][0].set_ylabel('y')
-    axes[0][0].legend()
-    axes[0][0].set_title(f'Original y(t) when U = {target_U}')
-
     new_properties = default_properties.copy()
+
+    new_properties['l_t'] *= -0.5
+    new_properties['l_a'] *= 0.5
 
     new_solution = simulate(new_properties, 1, 1, target_U)
     new_eigs = get_wingsuit_eigs(new_properties, U_vals)
 
-    eig_lines = plot_eigs(U_vals, new_eigs, axes[1][1:])
+    eig_lines = plot_eigs(U_vals, new_eigs, axes[1:])
 
-    [response_line] = axes[1][0].plot(new_solution.t, new_solution.y[1])
-    axes[1][0].set_xlabel('t')
-    axes[1][0].set_ylabel('y')
-    axes[1][0].set_title(f'New y(t) when U = {target_U}')
+    [response_line] = axes[0].plot(new_solution.t, new_solution.y[1])
+    axes[0].set_xlabel('t')
+    axes[0].set_ylabel('y')
+    axes[0].set_title(f'New y(t) when U = {target_U} m/s')
 
-    axes[1][1].axvline(x=target_U)
-
-    fig, control_axes = plt.subplots(1, len(default_properties) + 1)
-
-    sliders = {
-        'U': Slider(
-            ax=control_axes[0],
-            label='U',
-            valmin=0,
-            valmax=330 / 3.6,
-            valinit=target_U,
-            orientation='vertical',
-        )
-    }
+    axes[1].axvline(x=target_U)
     
-    def update(val):
-        for key in sliders:
-            new_properties[key] = sliders[key].val
-        
-        target_U = sliders['U'].val
-
-        axes[1][0].set_title(f'New y(t) when U = {target_U}')
-        
-        new_solution = simulate(new_properties, 1, 1, target_U)
-        new_eigs = get_wingsuit_eigs(new_properties, U_vals)
-
-        response_line.set_data(new_solution.t, new_solution.y[1])
-
-        axes[1][0].relim()
-        axes[1][0].autoscale_view()
-        
-        for i, eigset in enumerate(new_eigs):
-            eig_lines['real'][i].set_ydata(eigset.real)
-            eig_lines['imaginary'][i].set_ydata(eigset.imag)
-        
-        fig.canvas.draw_idle()
-
-    sliders['U'].on_changed(update)
-
-    for i, key in enumerate(default_properties):
-        valinit = default_properties[key]
-
-        sliders[key] = Slider(
-            ax=control_axes[i + 1],
-            label=key,
-            valmin=valinit / 2,
-            valmax=valinit * 2,
-            valinit=valinit,
-            orientation='vertical'
-        )
-
-        sliders[key].on_changed(update)
-
 part_d()
 
 plt.ion()

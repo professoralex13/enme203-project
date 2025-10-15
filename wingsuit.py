@@ -50,7 +50,7 @@ def get_wingsuit_eigs(p: WingsuitProperties, airspeed_values: np.ndarray[float])
     
     return np.transpose(all_eigs)
 
-def simulate(properties: WingsuitProperties, initial_y_velocity: float, initial_theta_velocity: float, airspeed: float, log = False):
+def simulate(properties: WingsuitProperties, initial_y_velocity: float, initial_theta_velocity: float, airspeed: float):
     y0 = [0, 0, initial_theta_velocity, initial_y_velocity]
     
     t_span = (0, 1)
