@@ -8,6 +8,8 @@
 \usepackage{fancyhdr}
 \usepackage{graphicx,xcolor}
 \usepackage{geometry,cite}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \fancyhead{}
 \fancyfoot{}
 \fancyhead[L]{\footnotesize{\textsf{Alex Cutforth | 24375019}}}
@@ -72,18 +74,32 @@ This project focuses on analysing the properties of a simplified wingsuit model,
 \end{enumerate}
 \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Example: In this example sentence I refer to one of my own publications on MEMS technology \cite{gutschmidt2024} to make you aware of the IEEE standard \cite{IEEE} which is mostly used for engineering articles and reports. (The work cited here is totally unrelated to the project!)]}}
 
-
 % ----------------------------------------------------------------
 \section*{Model Description}
-The wingsuit side profile is based on a symmetric 1m long NACA0012 foil.
+The wingsuit side profile is based on a symmetric 1m long NACA0012 foil, as shown in Figure \ref{fig:3d_model}.
 However this shape is only relevant for the derivation of Moments and Products of Inertia.\\\\
-$k = 1500$ N/m, $k_{\theta} = 200$ Nm/rad, $d = 150$ Ns/m, $d_{\theta} = 0.03$ Nms/rad, $l_{\theta} = 0.1$ m, $l_{\alpha} = 0.05$ m, $m = 2$ kg, $I^F = 0.13$ kgm\textsuperscript{2}, $C_{\theta} = 0.4$ kg/m, $C_y = 0.6$ kg/m
+The properties of the system model shown in Figure \ref{fig:sim_model} are given: \\
+$k = 1500$ N/m, $k_{\theta} = 200$ Nm/rad, $d = 150$ Ns/m, $d_{\theta} = 0.03$ Nms/rad, $l_{\theta} = 0.1$ m, $l_{\alpha} = 0.05$ m, $m = 2$ kg, $I^F = 0.13$ kgm\textsuperscript{2}, $C_{\theta} = 0.4$ kg/m, $C_y = 0.6$ kg/m, $L = C_{\theta}U^2\theta+C_yU\dot{y}$
 \\\\
 \textcolor[rgb]{0.80,0.29,0.09}{\textsl{[In this section, briefly describe the model and underlying assumptions. This includes using figures with figure descriptions and referencing to these in the text.]}}
 
-\begin{figure}[h!]
+\begin{figure}
   \centering
-  \caption{...}\label{fig:model}
+  \includegraphics[width=170mm, trim=3 3 3 3, clip]{model.png}
+  \caption{Simulation Model}\label{fig:sim_model}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[width=0.8\linewidth, xlabel=$x$, ylabel=$y$, zmin=-0.2, zmax=0.2, x dir = reverse]
+      % uncomment these for final export, they are VERY SLOW TO RENDER
+      %\addplot3[surf, color=red, domain=0:1, samples=50]{-5*0.12*(0.2969*sqrt(x)-0.126*x-0.3516*x^2+0.2843*x^3-0.1036*x^4)};
+      %\addplot3[surf, color=red, domain=0:1, samples=50]{5*0.12*(0.2969*sqrt(x)-0.126*x-0.3516*x^2+0.2843*x^3-0.1036*x^4)};
+    \end{axis}
+  \end{tikzpicture}
+  % \includegraphics[width=170mm, trim=3 3 3 3, clip]{foil.png}
+  \caption{3D Foil Model}\label{fig:3d_model}
 \end{figure}
 
 % ----------------------------------------------------------------
@@ -260,12 +276,20 @@ $$
     -K&-D
   \end{bmatrix}
 $$
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=170mm, trim=3 3 3 3, clip]{modal_roots.png}
+  \caption{Modal Roots}\label{fig:modal_roots}
+\end{figure}
 The roots of this system can then be plotted against Airspeed using an eigenvalue finder. \\
 A system is unstable if the real parts of any of its eigenvalues is postive, and Figure \ref{fig:modal_roots} shows that the system has positive real components for approximately $U > 30$ m/s, meaning this wingsuit model is not very stable at the reasonably high speeds needed for flight.
+\\\\
+Through some trial and error, it was found that putting the centre of lift behind the centre of gravity, by making $l_{\theta}$ negative, and decreasing the size of $l_{\alpha}$, the system remains stable into much higher airspeeds. This is shown in figure \ref{fig:optimized_system}
+
 \begin{figure}
   \centering
-  \includegraphics[width=170mm]{modal_roots.png}
-  \caption{Modal Roots}\label{fig:modal_roots}
+  \includegraphics[width=170mm, trim=3 3 3 3, clip]{optimized_system.png}
+  \caption{Optimized System}\label{fig:optimized_system}
 \end{figure}
 
 % ----------------------------------------------------------------
