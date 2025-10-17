@@ -9,6 +9,8 @@
 \usepackage{graphicx,xcolor}
 \usepackage{geometry,cite}
 \usepackage{pgfplots}
+\usepackage{listings}
+\usepackage{array}
 \pgfplotsset{compat=1.18}
 \fancyhead{}
 \fancyfoot{}
@@ -37,7 +39,7 @@
 \vspace*{\fill}
 
 \textbf{\huge{\textsl{Dynamics of a simplified wingsuit}}}\\
-ENME203 2025 Project\\
+ENME203 2025 Project
 \vspace*{\fill}
 
 
@@ -54,7 +56,10 @@ ENME203 2025 Project\\
 
 % ----------------------------------------------------------------
 \section*{Abstract}
-\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[This space is filled with a brief summary about all of the content of this report. It describes and connects all sections: Include topic, main idea, aims, model and method /types of analyses used, and findings and conclusions. Approximate length: 120 words +/- 10\%.]}}
+This report analyses the vibration of a simple wingsuit model.
+It outlines the physical shape and properties of the wingsuit, outlines the method for deriving unknown properties such as centre of mass and moment of inertia, and the process of deriving equations of motion for representing the behavior of a simple wingsuit system.
+Finally, modal analysis and numerical differential equation solvers are used to test the stability of the system at different airspeeds.
+It is found that placing the centre of lift infront of the centre of rotation and centre of lift can allow a wingsuit to remain stable at higher speeds than if it were designed otherwise.
 
 
 % ----------------------------------------------------------------
@@ -65,24 +70,21 @@ This project focuses on analysing the properties of a simplified wingsuit model,
   \item Derivation of moments of interia, and relevant equations of motion
   \item Optimization of wingsuit properties for stability improvement
 \end{itemize}
-\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[The introduction of this technical report includes a bit of background and purpose of the project. Identify the subject, background information on its development and use, the aims of the project’s analyses, and the purpose of the project. A complete literature review is usually part of professional communications, to inform the reader of the current state of the research on the subject. A very brief version of that is appropriate here:}}
-\begin{enumerate}
-  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Please cite 2-3 sources (no links to websites, e.g. Wikipedia – use scholarly/professional sources) used to inform your writing of this section}}
-  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Include all citations in your list of References. The Reference list should be on its own page.}}
-  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{The IEEE referencing style should be used.}}
-  \item \textcolor[rgb]{0.80,0.29,0.09}{\textsl{Approximate length: 150-200 words.}}
-\end{enumerate}
-\textcolor[rgb]{0.80,0.29,0.09}{\textsl{Example: In this example sentence I refer to one of my own publications on MEMS technology \cite{gutschmidt2024} to make you aware of the IEEE standard \cite{IEEE} which is mostly used for engineering articles and reports. (The work cited here is totally unrelated to the project!)]}}
+The purpose of this project is to determine which design properties are most important for ensuring a stable system in flight.
+The findings may be able to serve as a set of guidlines for future wingsuit development.
+According to \cite{Sepahvand2020}, skydivers have observed that wingsuits tend to start exibiting unstable behavior at around 83 m/s, so this project will find a set of conditions where the wingsuit can remain stable up to some speed greater than that.
 
 % ----------------------------------------------------------------
 \section*{Model Description}
 The wingsuit side profile is based on a symmetric 1m long NACA0012 foil, as shown in Figure \ref{fig:3d_model}.
-However this shape is only relevant for the derivation of Moments and Products of Inertia.\\\\
-The properties of the system model shown in Figure \ref{fig:sim_model} are given: \\
-$k = 1500$ N/m, $k_{\theta} = 200$ Nm/rad, $d = 150$ Ns/m, $d_{\theta} = 0.03$ Nms/rad, $l_{\theta} = 0.1$ m, $l_{\alpha} = 0.05$ m, $m = 2$ kg, $I^F = 0.13$ kgm\textsuperscript{2}, $C_{\theta} = 0.4$ kg/m, $C_y = 0.6$ kg/m, $L = C_{\theta}U^2\theta+C_yU\dot{y}$
+However this shape is only relevant for the derivation of Moments and Products of Inertia. The equation for this foil profile is:
+\begin{equation}
+  y_{foil}(x) = 5t_0(0.2969\sqrt{x}-0.126x-0.3516x^2+0.2843x^3-0.1036x^4) \label{eq:foil}
+\end{equation}
+where $t_0 = 0.12$ such that the length of the foil is 1m.
 \\\\
-\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[In this section, briefly describe the model and underlying assumptions. This includes using figures with figure descriptions and referencing to these in the text.]}}
-
+The properties of the system model shown in Figure \ref{fig:sim_model} are given: \\
+$k = 1500$ N/m, $k_{\theta} = 200$ Nm/rad, $d = 150$ Ns/m, $d_{\theta} = 0.03$ Nms/rad, $l_{\theta} = 0.1$ m, $l_{\alpha} = 0.05$ m, $m = 2$ kg, $C_{\theta} = 0.4$ kg/m, $C_y = 0.6$ kg/m, $L = C_{\theta}U^2\theta+C_yU\dot{y}$
 \begin{figure}
   \centering
   \includegraphics[width=170mm, trim=3 3 3 3, clip]{model.png}
@@ -92,20 +94,17 @@ $k = 1500$ N/m, $k_{\theta} = 200$ Nm/rad, $d = 150$ Ns/m, $d_{\theta} = 0.03$ N
 \begin{figure}
   \centering
   \begin{tikzpicture}
-    \begin{axis}[width=0.8\linewidth, xlabel=$x$, ylabel=$y$, zmin=-0.2, zmax=0.2, x dir = reverse]
-      % uncomment these for final export, they are VERY SLOW TO RENDER
-      %\addplot3[surf, color=red, domain=0:1, samples=50]{-5*0.12*(0.2969*sqrt(x)-0.126*x-0.3516*x^2+0.2843*x^3-0.1036*x^4)};
-      %\addplot3[surf, color=red, domain=0:1, samples=50]{5*0.12*(0.2969*sqrt(x)-0.126*x-0.3516*x^2+0.2843*x^3-0.1036*x^4)};
+    \begin{axis}[width=0.8\linewidth, xlabel=$x$, ylabel=$z$, zlabel=$y$, zmin=-0.2, zmax=0.2, x dir = reverse]
+      % These are VERY SLOW TO RENDER, so it is recommended to comment them out during writing
+      \addplot3[surf, color=red, domain=0:1, samples=50]{-5*0.12*(0.2969*sqrt(x)-0.126*x-0.3516*x^2+0.2843*x^3-0.1036*x^4)};
+      \addplot3[surf, color=red, domain=0:1, samples=50]{5*0.12*(0.2969*sqrt(x)-0.126*x-0.3516*x^2+0.2843*x^3-0.1036*x^4)};
     \end{axis}
   \end{tikzpicture}
-  % \includegraphics[width=170mm, trim=3 3 3 3, clip]{foil.png}
   \caption{3D Foil Model}\label{fig:3d_model}
 \end{figure}
 
 % ----------------------------------------------------------------
 \section*{Method}\label{sec:method}
-\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[This section brings parts 1 and 2 of the project together. Begin with 1-2 sentences explaining the overarching method of using Newton’s/Euler’s method to bring together kinematics (part1) and dynamics (part 2) to generate the EOM.  Include any constraint equations (as part of the analysis, if applicable). Details of the method will then be explained in the following sub-sections: Kinematics, Dynamics and Equations of Motion.]}}
-
 
 % ----------------------------------------------------------------
 \subsection*{Kinematics}\label{sec:kin}
@@ -122,50 +121,81 @@ Since the centre of rotation is not in the same place as the centre of mass for 
     -\ddot{\theta}l_{\theta}\cos\theta + \dot{\theta}^2l_{\theta}\sin\theta 
   \end{pmatrix} \label{eq:kin2}
 \end{align}
-\begin{figure}[h!]
-  \centering
-  \caption{...}\label{fig:kin_sketch}
-\end{figure}
 
 % ----------------------------------------------------------------
 \subsection*{Dynamics}\label{sec:dyn}
-The equations of motions use the format of the basic translational and rotational mass/dampener/spring systems:
+\begin{align}
+  m\ddot{q} &= F \nonumber \\
+  m\ddot{q} &= F - d\dot{q} - kq \nonumber \\
+  m\ddot{q} + d\dot{q} + kq &= F \label{eq:mdk}
+\end{align}
+Equation \ref{eq:mdk} is the equation of motion for a generic Mass/Dampener/Spring system, such as the one shown in Figure \ref{fig:fbd}.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=100mm]{FBD.png}
+  \caption{Generic M/D/K system Free Body Diagram}\label{fig:fbd}
+\end{figure}
+The wingsuit system being analysed here consists of two M/D/K systems, with the quantities $y$ and $\theta$ respectively, as shown in Figure \ref{fig:sim_model}.
+\\\\
+Before these equations can be applied, the moment of inertia about the flexural axis point F must be found.
+Some prerequisite quantities for that are cross sectional area and centre of mass:
+\begin{align*}
+  A &= \int_0^{l_c}2y_{foil}(x)dx \\
+    &\approx 0.0817~\mathrm{m^2} \\\\
+  x_{COM} &=\frac{1}{A}\int_0^{l_c}x[2y_{foil}(x)]dx\\
+    &\approx 0.4179~\mathrm{m}
+\end{align*}
+\textsl{Integral results are found with numerical solvers, and $y_{foil}(x)$ is defined in Equation \ref{eq:foil}}
+
+\pagebreak
+The formula for moment of inertia about the Z-axis is $\int(x^2+y^2)dm$, and applying that to the wingsuit model gives:
+\begin{align*}
+	I_{ZZ}^O &= \int(x^2+y^2)dm \\
+    &= \int(x^2+y^2)\sigma dxdydz \\
+    &= \int_0^w\sigma dz \int_0^1\int_{-y_{foil}(x)}^{y_{foil}(x)}(x^2+y^2)dydx \\
+    &= \frac{m}{A}\int_0^1\int_{y_{low}(x)}^{y_{up}(x)}(x^2+y^2)dydx \\
+    &\approx 0.4596~\mathrm{kgm^2}
+\end{align*}
+This gives the moment of intertia about the origin, which is the front tip of the wingsuit, however the quantity needed for the rotational system is moment of inertia about point F. This can be done using the parralel axis theorem $I^A=I^G+mr_g^2$.
+\begin{align*}
+  I^O &= I^G + mr_G^2 \\
+  I^F &= I^G + mr_F^2 \\\\
+  => I^F &= I^O + m(r_F^2-r_O^2) \\
+    &\approx 0.1303
+\end{align*}
+% ----------------------------------------------------------------
+\subsection*{Equation of Motion}\label{sec:eom}
+Taking the generic M/D/K equation format from Equation \ref{eq:mdk} and substituting the quantities from the distinct translational and rotational systems gives us the equations of motion:
 \begin{align*}
   m\ddot{y} + d\dot{y} + ky &= F \\
-  I\ddot{\theta} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= T
+  I^F\ddot{\theta} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= T
 \end{align*}
-The symbols $F$ and $T$ represent external force and torque acting upon the system, which for this model is just the lift force acting at point A
+The symbols $F$ and $T$ represent external force and torque acting upon the system, which for this model is just the lift force acting at point A.
 \begin{align*}
   m\ddot{y} + d\dot{y} + ky &= L = C_{\theta}U^2\theta + C_yU\dot{y} \\
-  I\ddot{\theta} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= l_{\alpha}\theta = l_{\alpha}(C_{\theta}U^2\theta + C_yU\dot{y})
+  I^F\ddot{\theta} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= l_{\alpha}L = l_{\alpha}(C_{\theta}U^2\theta + C_yU\dot{y})
 \end{align*}
 Then, since the centre of rotation is not in the same location as the centre of mass, the equations must be linearized, giving the final equations of motion:
 \begin{align}
   m\ddot{y} - ml_{\theta}\ddot{\theta} + d\dot{y} + ky &= L = C_{\theta}U^2\theta + C_yU\dot{y}\label{eq:eom1} \\
-  I\ddot{\theta} - ml_{\theta}\ddot{y} + d_{\theta}\dot{\theta} + k_{\theta}\theta &= l_{\alpha}\theta = l_{\alpha}(C_{\theta}U^2\theta + C_yU\dot{y})\label{eq:eom2}
+  I^F\ddot{\theta} - ml_{\theta}\ddot{y} + d_{\theta}\dot{\theta} + k_{\theta}L &= l_{\alpha}\theta = l_{\alpha}(C_{\theta}U^2\theta + C_yU\dot{y})\label{eq:eom2}
 \end{align}
 This is a 2 degrees of freedom system, hence why there are two seperate equations of motion. This is because the translational and rotational properties of the system are not completely dependent upon each other. However, they are \textsl{partially} dependent, which is why there is sharing of quantities between equations. These are known as coupled equations.
 
-[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 2. Introduce the kinetic relations using/referring to a free-body-diagram.}}] 
-
-% ----------------------------------------------------------------
-\subsection*{Equation of Motion}\label{sec:eom}
-[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 2. Briefly describe the derivation of the equation(s) of motion. Explain the degrees of freedom, and any underlying assumptions. Accompany the method with necessary sketches (e.g. free-body diagram(s) etc.).}}]
-
 % ----------------------------------------------------------------
 \section*{Analysis \& Discussions}\label{sec:anal_disc}
-[\textcolor[rgb]{0.80,0.29,0.09}{\textsl{This section mainly contains content of Project Part 3. Present results professionally by relating figures/graphs to equation numbers, describing graphs and observations, and discussing results and their meaning.]}}
-\subsection*{Decoupled Analysis}\label{sec:coupled_analysis}
+\subsection*{Decoupled Analysis}\label{sec:decoupled_analysis}
 As stated in the Dynamics section, the equations of motion for this system are coupled, this means the equations can not be analysed induvidually, but rather as a system of differential equations.
 However, it is possible to set specific conditions where the equations decouple from each other, this occurs when the centre of mass and flexural axis are aligned ($l_{\theta} = 0$), and the lift coefficient associated with the equation in question's quantity is set to zero ($C_y$ or $C_{\theta} = 0 $). \\\\
-Case 1, where $l_{\theta} = 0$ and $C_y = 0$ results in an equation of motion for rotation of
+Case 1, substituting $l_{\theta} = 0$ and $C_y = 0$ into Equation \ref{eq:eom2} gives:
 \begin{equation}
   \ddot{\theta}+\frac{d_{\theta}}{I^F}\dot{\theta}+\frac{k_{\theta}-l_{\alpha}C_{\theta}U^2}{I^F}\theta = 0 \label{eq:decoupled1}
 \end{equation}
-This equation can then be considered with the format $\ddot{q} + 2\zeta\omega\dot{q}+\omega^2q = 0$, giving the formulas for frequency and damping ratio:
+This equation can then be considered with the format $\ddot{q} + 2\zeta\omega\dot{q}+\omega^2q = 0$, giving:
 \begin{align*}
-  \omega &= \sqrt{\frac{k_{\theta}-l_{\alpha}C_{\theta}U^2}{I^F}} \\
-  \zeta &= \frac{d_{\theta}}{2\sqrt{I^F(k_{\theta}-l_{\alpha}C_{\theta}U^2)}}
+  \omega &= \sqrt{\frac{k_{\theta}-l_{\alpha}C_{\theta}U^2}{I^F}} \quad \mathrm{(Angular~Frequency)} \\
+  \zeta &= \frac{d_{\theta}}{2\sqrt{I^F(k_{\theta}-l_{\alpha}C_{\theta}U^2)}} \quad \mathrm{(Damping~Ratio)}
 \end{align*}
 This information allows us to find a critical airspeed where the wingsuit's torsional mode becomes statically unstable.
 This critical airspeed occurs when the real component of the roots (given by $\lambda = -\zeta\omega\pm i\omega\sqrt{1-\zeta^2}$) of the equation of motion equal zero.
@@ -175,10 +205,51 @@ Given a positive value for $d_{\theta}$, the equation for $\zeta$ cannot be zero
   U &= \sqrt{\frac{k_{\theta}}{l_{\alpha}C_{\theta}}}\\
     &= 100~\mathrm{m/s}
 \end{align*}
+Which is further demonstrated in Figure \ref{fig:decoupled_case1}
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[xlabel=U (airspeed) m/s, ylabel=$\omega~\mathrm{(Angular Velocity)~rad/s}$]
+      \addplot[color=red, domain=0:100]{sqrt((200 - 0.05 * 0.4 * x^2) / 0.13)};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Graph showing x-intercept of angular velocity}\label{fig:decoupled_case1}
+\end{figure}
+\\\\
+Case 2, substituting $l_{\theta} = 0$ and $C_y = 0$ into Equation \ref{eq:eom1} gives:
+\begin{equation}
+  \ddot{y}+\frac{d-C_yU}{m}\dot{y}+\frac{k}{m}y = 0
+\end{equation}
+And again, using the format $\ddot{q} + 2\zeta\omega\dot{q}+\omega^2q = 0$ gives the equations:
+\begin{align*}
+  \omega &= \sqrt{\frac{k}{m}} \\
+  \zeta &= \frac{d-C_yU}{2\sqrt{km}}
+\end{align*}
+To find the condition where the real component of the roots is zero, $\zeta$ must be zero, since $\omega$ cannot be zero in this case (unless the spring is removed, such that $k = 0$, but that is a trivial case to be ignored).
+\begin{align*}
+  U  &= \frac{d}{C_y} \\
+  &= 250 ~\mathrm{m/s}
+\end{align*}
+The y-intercept to show this is given in Figure \ref{fig:decoupled_case2}, and evidence of stable and unstable oscillation is shown in Figure \ref{fig:decoupled_solution}
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[xlabel=U (airspeed) m/s, ylabel=$\zeta~\mathrm{(Damping Ratio)}$]
+      \addplot[color=red, domain=0:250]{(0.6 *x - 150)/4};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Graph showing x-intercept of damping ratio}\label{fig:decoupled_case2}
+\end{figure}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=100mm]{decoupled_solution.png}
+  \caption{Solutions to oscillation of y over 1 second on either side of critical airspeed}\label{fig:decoupled_solution}
+\end{figure}
+
 
 \subsection*{Modal Analysis}\label{sec:modal_analysis}
 Modal analysis allows us to see the stability of the system as a whole when both degrees of freedom are partially interacting.
-To analyse both equations of motion simultaneously they can be represented in a matrix system of the form
+To analyse both equations of motion simultaneously they can be represented in a matrix system of the form:
 $$
   \mathbf{M}\ddot{X}+\mathbf{D}\dot{X}+\mathbf{K}X = 0
 $$
@@ -224,7 +295,7 @@ $$
   }^X
   = 0
 $$
-This system can then be converted into state space
+This system can then be converted into state space.
 \begin{align*}
   \begin{bmatrix}
     I&0\\
@@ -252,41 +323,41 @@ This system can then be converted into state space
   \end{bmatrix}
   &=
   \begin{bmatrix}
-    I&0\\
-    0&M
-  \end{bmatrix}^{-1}
-  \begin{bmatrix}
     0&I\\
     -K&-D
   \end{bmatrix}
+  \begin{bmatrix}
+    I&0\\
+    0&M
+  \end{bmatrix}^{-1}
   \begin{bmatrix}
     X\\
     \dot{X}
   \end{bmatrix}
 \end{align*}
-This system is suitable for use with an initial value problem numerical solver, and we can analyse the behavior of such a system by finding the eigenvalues of the coefficient matrix
+This system is suitable for use with an initial value problem numerical solver, and the stability can be determined by finding the eigenvalues of the coefficient matrix (see Figure \ref{fig:modal_roots} and Appendix A).
 $$
   A = 
   \begin{bmatrix}
-    I&0\\
-    0&M
-  \end{bmatrix}^{-1}
-  \begin{bmatrix}
-    0&I\\
+    0&I \\
     -K&-D
   \end{bmatrix}
+  \begin{bmatrix}
+    I&0 \\
+    0&M
+  \end{bmatrix}^{-1}
 $$
 \begin{figure}[h!]
   \centering
   \includegraphics[width=170mm, trim=3 3 3 3, clip]{modal_roots.png}
-  \caption{Modal Roots}\label{fig:modal_roots}
+  \caption{Unoptimized Modal Roots}\label{fig:modal_roots}
 \end{figure}
-The roots of this system can then be plotted against Airspeed using an eigenvalue finder. \\
-A system is unstable if the real parts of any of its eigenvalues is postive, and Figure \ref{fig:modal_roots} shows that the system has positive real components for approximately $U > 30$ m/s, meaning this wingsuit model is not very stable at the reasonably high speeds needed for flight.
+A system is unstable if the real parts of any of its eigenvalues is postive, and Figure \ref{fig:modal_roots} shows that the system has positive real components for approximately $U > 30$ m/s, meaning this wingsuit model looses stability above that velocity. This is a relatively low speed for general wingsuit flight, so this must be improved.
 \\\\
-Through some trial and error, it was found that putting the centre of lift behind the centre of gravity, by making $l_{\theta}$ negative, and decreasing the size of $l_{\alpha}$, the system remains stable into much higher airspeeds. This is shown in figure \ref{fig:optimized_system}
-
-\begin{figure}
+Through some trial and error, it was found that putting the centre of lift behind the centre of gravity, by making $l_{\theta}$ negative, and decreasing the size of $l_{\alpha}$, the system remains stable into much higher airspeeds. This is shown in Figure \ref{fig:optimized_system} (the vertical line in the graph of real components is a reference velocity of 92m/s or 330km/h).
+\\\\
+While this analysis can shed light on the general behavior of properties of a wingsuit, this method of analysis is unlikely to yield accurate predictions of the behavior of a real wingsuit in flight, as it is ignoring many aerodynamic phenomena which can impact the inflight behavior, such as air turbulence, vortices, and other external forces not parralel with the vertical axis. Further research could include comprehensive aerodynamic simulations or even Finite Element Analysis on the foil to determine what effects the system vibrations may have on the integrity of the wing structure.
+\begin{figure}[h!]
   \centering
   \includegraphics[width=170mm, trim=3 3 3 3, clip]{optimized_system.png}
   \caption{Optimized System}\label{fig:optimized_system}
@@ -294,12 +365,55 @@ Through some trial and error, it was found that putting the centre of lift behin
 
 % ----------------------------------------------------------------
 \section*{Conclusions}\label{sec:conclusion}
-\textcolor[rgb]{0.80,0.29,0.09}{\textsl{[Wrap up the report by summarising key findings and linking results back to the motivation/purpose of the project as described in Introduction section. Approximate length: 80-120 words]}}
-
+This report outlined the process for determening the properties of a standard NACA foil, and deriving the equations of motion for translational and rotational movement in a wingsuit.\
+Using these equations, a method for analyzing the stability of the system was found using linear algebra and numerical analysis.
+Based on this analysis the initial properties of the wingsuit model were optimized to increase the maximum stable airspeed for the wingsuit. This was done by shifting the centre of mass to be infront of the centre of lift and flexural axis.
+Further research should be done to validate this analysis through the use of aerodynamic simulations to help understand the influence of airflow around the wingsuit on the stability of the system.
 
 % ----------------------------------------------------------------
 \bibliography{project}{}
 \bibliographystyle{unsrt}
+
+\pagebreak
+\section*{Appendix A}\label{sec:code}
+\lstinputlisting[language=Python, caption=Wingsuit Modeling Script]{wingsuit.py}
+\pagebreak
+\thispagestyle{empty}
+\section*{Declaration of Use for Generative AI in Assessments \quad \includegraphics[width=30mm]{UCLogo.png}}
+\begin{center}
+
+\begin{tabular}{|c|c|}
+  \hline
+  Full Name & Alexander James Cutforth \\
+  \hline
+  Student ID Number & 24375019 \\
+  \hline
+  Student Email & acu60@uclive.ac.nz \\
+  \hline
+  Course Code & ENME203 \\
+  \hline
+  Assessment Name & Project Part 3 Communication Skills \\
+  \hline
+\end{tabular}
+\subsection*{Acknowledgement of Assessment Submission}
+I, Alex Cutforth, hereby confirm that on \today:
+\begin{enumerate}
+  \item The document I have submitted was written by me.
+  \item When using AI, I have ensured that the work produced is still my own and I understand that submitting output from a generative AI tool as my own is NOT acceptable.
+  \item To assist with maintaining academic integrity, I have appropriately acknowledged any use of generative AI in my work (list below as applicable).
+  \item I acknowledge that any undeclared use of generative AI will constitute academic dishonesty and will be dealt with according to relevant University policy.
+  \item I understand that I will be held accountable and liable for any academic misconduct that arises in breach of any relevant University policy, as well as the consequences of such infringements.
+\end{enumerate}
+\subsection*{Acknowledgement of Generative AI Tools Used}
+\begin{tabular}{|m{3cm}|m{3cm}|m{10cm}|}
+  \hline
+  AI Tool Used & Purpose of Use & Briefly Explain the Extent of Use \\
+  \hline
+  Claude Sonnet 4.5 & Write a Python function & I used it to write a function which was used for sorting eigenvalues after finding them numerically. This behavior is not required for the project nor is it taught in the course, but the plotted graphs of eigenvalue components were much harder to read previously as the colourcoding does not work properly without sorting them. The function in question has an acknowledgement of this commented above it.\\
+  \hline
+\end{tabular}
+
+\end{center}
 
 \end{document}
 % ----------------------------------------------------------------
